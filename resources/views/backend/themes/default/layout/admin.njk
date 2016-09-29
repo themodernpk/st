@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "./partials/head.njk" %}
+<!--page specific head-->
+{% block page_specific_head %}{% endblock %}
+<!--page specific head-->
+<body class="{% if data.bodyClass %}{{ data.bodyClass }}{% endif %}">
+
+{% include "./partials/header.njk" %}
+
+<div class="container-fluid m-t-50" >
+    <div class="row">
+        {% include "./partials/sidebar.njk" %}
+        <div class="col-sm-12 col-md-9 col-lg-10">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+</div>
+
+{% include "./partials/footer.njk" %}
+<!--common js-->
+{% include './partials/footer_scripts.njk' %}
+<!--/common js-->
+<!--page specific footer-->
+{% block page_specific_footer %}{% endblock %}
+<!--page specific footer-->
+</body>
+</html>

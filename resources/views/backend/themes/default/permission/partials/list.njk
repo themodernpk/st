@@ -1,0 +1,15 @@
+<table class="table table-bordered table-condensed">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Slug</th>
+        <th>Enabled</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% asyncEach item in list %}
+    {% include "./item.njk" %}
+    {% endeach %}
+    </tbody>
+</table>

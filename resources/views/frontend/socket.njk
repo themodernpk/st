@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Socket Test</title>
+
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Speed Tracking</h2>
+
+            <form id="speedTracking">
+
+
+                Tracking Request To: <input type="text" name="speed" class="form-control" value=""/>
+                <br/>
+
+                <input type="text" name="lat" class="form-control" value=""/><br/>
+                <input type="text" name="lng" class="form-control" value=""/><br/>
+                <input type="text" name="unit" class="form-control" value="km/h"/><br/>
+                <input type="text" name="token" class="form-control" value="{{ data.input.token }}"/><br/>
+
+                <br/>
+
+                <button type="submit" class="btn btn-success">Send Speed</button>
+
+            </form>
+        </div>
+
+        <div class="col-md-6">
+            <h2>Raise Tracking Request</h2>
+
+            <form id="raiseTrackingRequest">
+
+
+                Tracking Request To: <select name="tracker_user_id" class="form-control">
+                    {% for item in data.list.user %}
+                        <option value="{{ item.id }}">{{ item.first_name }}</option>
+                    {% endfor %}
+                </select>
+                <br/>
+
+                <input type="text" name="token" class="form-control" value="{{ data.input.token }}"/>
+                <br/>
+
+                <button type="submit" class="btn btn-success">Tracking Request</button>
+
+            </form>
+        </div>
+
+        <div class="col-md-2">
+            <h1>Speed: <span class="speed"></span></h1>
+        </div>
+
+    </div> <!-- row end-->
+
+
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+    var socketHost = "http://localhost:2222";
+    var token = "{{ data.input.token }}";
+    var socket = io(socketHost, {query: "token=" + token});
+    socket.connect();
+    //-----------------------------------------------------------------
+    socket.on('socket_specific', function (data) {
+        console.log("socket specific", data);
+    });
+
+    //-----------------------------------------------------------------
+    $("#raiseTrackingRequest").submit(function(e){
+        e.preventDefault();
+        var data = $(this).serializeFormJSON();
+        console.log("data", data);
+        socket.emit("raise_tracking_request", data);
+    });
+
+    //-----------------------------------------------------------------
+
+    socket.on('raise_tracking_request_response', function (data) {
+        alert("response received");
+        console.log("socket specific", data);
+    });
+    //-----------------------------------------------------------------
+    $("#speedTracking").submit(function(e){
+        e.preventDefault();
+        var data = $(this).serializeFormJSON();
+        console.log("data", data);
+        socket.emit("receive_tracked_speed", data);
+
+        $("input[name=speed]").val(randomNumberFromRange(20, 40));
+        $("input[name=lat]").val(getRandomInRange(-180, 180, 3));
+        $("input[name=lng]").val(getRandomInRange(-180, 180, 3));
+
+    });
+    //-----------------------------------------------------------------
+    socket.on('emit_tracked_speed', function (data) {
+        console.log("socket specific", data);
+        $(".speed").html(data.speed);
+    });
+    //-----------------------------------------------------------------
+
+    //serialize data to json object
+    (function ($) {
+        $.fn.serializeFormJSON = function () {
+
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function () {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+    })(jQuery);
+    //-----------------------------------------------------------------
+
+    //set random speed
+    $("input[name=speed]").val(randomNumberFromRange(20, 40));
+    function randomNumberFromRange(min,max)
+    {
+        var randomNumber = Math.floor(Math.random()*(max-min+1)+min);
+
+        return randomNumber;
+    }
+    //-----------------------------------------------------------------
+    $("input[name=lat]").val(getRandomInRange(-180, 180, 3));
+    $("input[name=lng]").val(getRandomInRange(-180, 180, 3));
+    function getRandomInRange(from, to, fixed) {
+        return (Math.random() * (to - from) + from).toFixed(fixed) * 1;
+        // .toFixed() returns string, so ' * 1' is a trick to convert to number
+    }
+    //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
+
+</script>
+
+</body>
+</html>
