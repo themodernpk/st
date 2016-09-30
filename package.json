@@ -22,6 +22,7 @@
     "cli-color": "^1.1.0",
     "co": "^4.6.0",
     "gulp": "^3.9.1",
+    "moment": "^2.15.1",
     "mysql": "^2.11.1",
     "niddar-pagination-generator": "^1.5.8",
     "request": "^2.74.0",

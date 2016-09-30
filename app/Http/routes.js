@@ -170,8 +170,14 @@ Route.group('apiSt', function () {
     Route.any("/socket/sync", 'SpeedoTracker/ApiSocketController.sync')
         .as("apiSocketSync");
 
-    Route.any("/tracker/request", 'SpeedoTracker/ApiTrackerController')
+    Route.any("/tracker/request", 'SpeedoTracker/ApiTrackerController.request')
         .as("apiTrackerRequest");
+
+    Route.any("/get/users", 'SpeedoTracker/ApiStUserController.users')
+        .as("apiStUsers");
+
+    Route.any("/speed/history", 'SpeedoTracker/ApiSpeedTrackerController.history')
+        .as("apiSpeedHistory");
 
 
 }).prefix('/api'+api_version+"/st").middleware('authApi');

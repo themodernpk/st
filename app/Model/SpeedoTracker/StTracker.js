@@ -191,7 +191,7 @@ class StTracker extends Lucid {
     {
         var stToken = yield StToken.findBy("token", input.token);
         var user = yield stToken.user().first();
-        input.core_user_id = user.id;
+        input.tracker_user_id = user.id;
 
         if (typeof input.status === 'undefined'){
             input.status = "pending";

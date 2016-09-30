@@ -43,7 +43,7 @@
             <form id="raiseTrackingRequest">
 
 
-                Tracking Request To: <select name="tracker_user_id" class="form-control">
+                Tracking Request To: <select name="core_user_id" class="form-control">
                     {% for item in data.list.user %}
                         <option value="{{ item.id }}">{{ item.first_name }}</option>
                     {% endfor %}
