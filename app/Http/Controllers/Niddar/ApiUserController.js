@@ -5,6 +5,8 @@ const Role = use("App/Model/Niddar/Role");
 const Token = use("App/Model/Niddar/Token");
 const Setting = use("App/Model/Niddar/Setting");
 
+const StUser = use("App/Model/SpeedoTracker/StUser");
+
 var data = {};
 var result = {};
 var user = new User();
@@ -51,6 +53,36 @@ class ApiUserController {
                 errors: [{message: e.message}]
             };
         }
+        return response.json(result);
+    }
+    //---------------------------------------------------------
+    *sync(request, response) {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+
+        if (data.input.hasOwnProperty('help')) {
+            result ={
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | current user token ",
+                }
+            };
+            return response.json(result);
+        }
+        user = yield api.getUser();
+        var stUser = yield StUser.find(user.id);
+        var token = yield stUser.tokens().first();
+        var trackers = yield stUser.trackers().with('user', 'socket').fetch();
+        var tracking = yield stUser.tracking().with('user', 'socket').fetch();
+        result = {
+            user: stUser,
+            token: token,
+            trackers: trackers,
+            tracking: tracking,
+        };
+
         return response.json(result);
     }
     //---------------------------------------------------------

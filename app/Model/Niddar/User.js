@@ -23,10 +23,13 @@ class User extends Lucid {
   static get dateFormat() {
     return 'YYYY-MM-DD HH:mm:ss'
   }
-
   //---------------------------------------------
   apiTokens () {
-    return this.hasMany('App/Model/Niddar/Token')
+    return this.hasMany('App/Model/Niddar/Token', 'id', 'user_id')
+  }
+  //---------------------------------------------
+  tokens () {
+    return this.hasMany('App/Model/Niddar/Token', 'id', 'user_id')
   }
   //---------------------------------------------
   roles() {
@@ -185,12 +188,12 @@ class User extends Lucid {
     try{
       yield authSession.attempt(input.email,input.password);
       var user = yield authSession.getUser();
-      var tokens = yield user.apiTokens().fetch();
+      var first = yield user.tokens().first();
       result = {
         status: "success",
         data: {
           user: user,
-          apiToken: tokens
+          first: first
         }
       };
       yield authSession.logout();

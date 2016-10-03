@@ -29,18 +29,21 @@ module.exports = function (server) {
             var socket_id = socket.id;
             currentSocket = socket_id;
             currentToken = token;
-            //console.log("token", token);
+            console.log("before connection", token);
             //console.log("socket", socket_id);
             connections[token] = socket_id;
             //console.log("connections", connections);
-            io.to(socket_id).emit('socket_specific', 'for your eyes only');
+
         }
         next();
     });
 
     //---------------------------------------------------------------
     io.on('connection', function (socket) {
-        console.log('Socket connected - %s socket are active', connections.length);
+        //console.log('Socket connected - %s socket are active', connections.length);
+        //console.log("connection", connections);
+
+        console.log("on connection", currentToken);
 
         //-------------------------------------
         //update the socket and user id in the database
@@ -60,6 +63,10 @@ module.exports = function (server) {
         //-------------------------------------
         //receive tracking requests
         socket.on("raise_tracking_request", function (data) {
+            /* Parameters to pass
+             * token: token of the current user
+             * core_user_id: user id which current user want to track
+             */
             //store the request to database
             co(function* () {
                 var result = yield stTracker.createFromToken(data);
@@ -75,6 +82,13 @@ module.exports = function (server) {
         //-------------------------------------
         //receive tracked speed
         socket.on("receive_tracked_speed", function (data) {
+            /* Parameters to pass
+             * speed: speed in default unit
+             * lat: latitude
+             * lng: longitude
+             * unit: default speed unit
+             * token: current user token
+             */
             //store the data to database
             co(function* () {
                 var trackers = yield stTracker.trackersFromToken(data.token);

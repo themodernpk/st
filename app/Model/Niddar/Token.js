@@ -22,6 +22,7 @@ class Token extends Lucid {
   *generate(user, request)
   {
 
+
     var exist = yield Token.findBy('user_id', user.id);
 
     if(exist)
@@ -33,6 +34,8 @@ class Token extends Lucid {
       };
       return result;
     }
+
+
 
     const api = request.auth.authenticator('api');
     try{
@@ -49,6 +52,8 @@ class Token extends Lucid {
         errors: [{message: e.message}]
       }
     }
+
+
 
     return result;
   }

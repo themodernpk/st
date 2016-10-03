@@ -50,6 +50,7 @@ class ApiTokenController{
 
 
         result = yield token.generate(user, request);
+
         yield authSession.logout();
         return response.json(result);
     }

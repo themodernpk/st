@@ -74,7 +74,8 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <script>
-    var socketHost = "http://localhost:2222";
+    //var socketHost = "http://localhost:2222";
+    var socketHost = "http://103.196.221.22:2222";
     var token = "{{ data.input.token }}";
     var socket = io(socketHost, {query: "token=" + token});
     socket.connect();
@@ -82,7 +83,6 @@
     socket.on('socket_specific', function (data) {
         console.log("socket specific", data);
     });
-
     //-----------------------------------------------------------------
     $("#raiseTrackingRequest").submit(function(e){
         e.preventDefault();
@@ -111,7 +111,7 @@
     });
     //-----------------------------------------------------------------
     socket.on('emit_tracked_speed', function (data) {
-        console.log("socket specific", data);
+        console.log("speed speed received", data);
         $(".speed").html(data.speed);
     });
     //-----------------------------------------------------------------
