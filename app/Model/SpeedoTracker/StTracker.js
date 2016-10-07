@@ -7,6 +7,7 @@ const Setting = use("App/Model/Niddar/Setting");
 
 const StToken = use("App/Model/SpeedoTracker/StToken");
 const StSocket = use("App/Model/SpeedoTracker/StSocket");
+const StUser = use("App/Model/SpeedoTracker/StUser");
 
 const table = "st_trackers";
 var result = {};
@@ -29,6 +30,10 @@ class StTracker extends Lucid {
     //---------------------------------------------
     user() {
         return this.belongsTo('App/Model/SpeedoTracker/StUser', 'id', 'core_user_id')
+    }
+    //---------------------------------------------
+    tracker() {
+        return this.belongsTo('App/Model/SpeedoTracker/StUser', 'id', 'tracker_user_id')
     }
     //---------------------------------------------
     socket() {
@@ -212,19 +217,47 @@ class StTracker extends Lucid {
     *trackersFromToken(token)
     {
         var getToken = yield StToken.findBy('token', token);
-        var user = yield getToken.user().fetch();
-        var trakers = yield user.trackers().fetch();
-        trakers = trakers.toJSON();
-        var sockets = [];
-        var i = 0
-        for (var item in trakers) {
-            var trk = yield StTracker.find(trakers[item].id);
-            var socket = yield trk.socket().first();
-            socket = socket.toJSON();
-            sockets[i]=socket.socket_id;
-            i++;
+        var user = yield getToken.user().first();
+        var stUser = yield StUser.find(user.id);
+        var trackers = yield stUser.trackers().with('socket.user').fetch();
+        trackers = trackers.toJSON();
+        //return trackers;
+
+        if(trackers)
+        {
+
+            var list = [];
+            var i = 0;
+            var tracker;
+            for(var item in trackers )
+            {
+                tracker = trackers[item];
+                if(tracker.socket)
+                {
+                    list[i] = {
+                        socket: tracker.socket.socket_id,
+                        email: tracker.socket.user.email,
+                        user_id: tracker.socket.user.id,
+                    };
+                    i++;
+                }
+
+            }
+
+            result = {
+                status: "success",
+                data: list
+            };
+
+            return result;
+        } else
+        {
+            result = {
+                status: "failed",
+                errors: [{message: "No tracker found"}]
+            } ;
+            return result;
         }
-        return sockets;
     }
     //---------------------------------------------
     //---------------------------------------------

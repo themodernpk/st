@@ -45,5 +45,29 @@ class ApiSocketController {
         return response.json(result);
     }
     //---------------------------------------------------------
+    *socket(request, response)
+    {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+
+        if (data.input.hasOwnProperty('help')) {
+            result ={
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | token of the user is required"
+                }
+            };
+            return response.json(result);
+        }
+        user = yield api.getUser();
+        if (typeof data.input.page === 'undefined'){
+            data.input.page = 1;
+        }
+        var list = yield StSocket.query().where('core_user_id', user.id).first();
+        return response.json(list);
+    }
+    //---------------------------------------------------------
 } //end of class
 module.exports = ApiSocketController;

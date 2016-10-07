@@ -145,7 +145,7 @@ Route.group('bApiPublic', function () {
 Route.group('bApi', function () {
     Route.any("/user/details", 'Niddar/ApiUserController.details');
 
-
+    //Route.any("/user/sync", 'Niddar/ApiUserController.sync');
 
 }).prefix('/api'+api_version).middleware('authApi');
 
@@ -156,7 +156,7 @@ Route.group('bApi', function () {
  |--------------------------------------------------------------------------
  */
 Route.group('speedoTrackerPublic', function () {
-    Route.any("/socket", 'SpeedoTracker/SpeedoTrackerController.socket');
+    Route.any("/socket", 'SpeedoTracker/SpeedoTrackerController.socket').as("webSocket");
     Route.any("/test", 'SpeedoTracker/SpeedoTrackerController.test');
 }).prefix("/speedotracker");
 
@@ -180,7 +180,16 @@ Route.group('apiSt', function () {
     Route.any("/speed/history", 'SpeedoTracker/ApiSpeedTrackerController.history')
         .as("apiSpeedHistory");
 
-    Route.any("/user/sync", 'Niddar/ApiUserController.sync');
+
+    Route.any("/user/trackers/all", 'SpeedoTracker/ApiTrackerController.allTrackersFromToken');
+
+    Route.any("/user/trackers", 'SpeedoTracker/ApiTrackerController.trackers');
+
+    Route.any("/user/tracking", 'SpeedoTracker/ApiTrackerController.tracking');
+
+    Route.any("/user/socket", 'SpeedoTracker/ApiSocketController.socket');
+
+
 
 
 }).prefix('/api'+api_version+"/st").middleware('authApi');

@@ -4,13 +4,12 @@ const User = use("App/Model/Niddar/User");
 const Token = use("App/Model/Niddar/Token");
 const Setting = use("App/Model/Niddar/Setting");
 const StTracker = use("App/Model/SpeedoTracker/StTracker");
-
+const StUser = use("App/Model/SpeedoTracker/StUser");
 var data = {};
 var result = {};
 var user = new User();
 var token = new Token();
 var tracker = new StTracker();
-
 class ApiTrackerController {
     //---------------------------------------------------------
     //---------------------------------------------------------
@@ -18,9 +17,8 @@ class ApiTrackerController {
         data.input = request.all();
         data.params = request.params();
         const api = request.auth.authenticator('api');
-
         if (data.input.hasOwnProperty('help')) {
-            result ={
+            result = {
                 status: "help",
                 title: "This method accept following parameters",
                 parameters: {
@@ -33,18 +31,105 @@ class ApiTrackerController {
             return response.json(result);
         }
         user = yield api.getUser();
-        if (typeof data.input.created_by === 'undefined')
-        {
+        if (typeof data.input.created_by === 'undefined') {
             data.input.created_by = user.id;
         }
-
-        if (typeof data.input.tracker_user_id === 'undefined'){
+        if (typeof data.input.tracker_user_id === 'undefined') {
             data.input.tracker_user_id = user.id;
         }
-
         result = yield tracker.createOrUpdate(data.input);
         return response.json(result);
     }
+
+    //---------------------------------------------------------
+    *trackers(request, response) {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+        if (data.input.hasOwnProperty('help')) {
+            result = {
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | token of the user is required",
+                    page: "required | page number",
+                }
+            };
+            return response.json(result);
+        }
+        user = yield api.getUser();
+        if (typeof data.input.page === 'undefined') {
+            data.input.page = 1;
+        }
+        var list = yield StTracker.query().select('id', 'core_user_id')
+            .where('core_user_id', user.id)
+            .with('user')
+            .scope('user', function (builder) {
+                builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')
+                    .with('tokens')
+                    .with('socket')
+            })
+
+            .paginate(data.input.page, 1);
+
+
+        return response.json(list);
+    }
+
+    //---------------------------------------------------------
+    *tracking(request, response) {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+        if (data.input.hasOwnProperty('help')) {
+            result = {
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | token of the user is required",
+                    page: "required | page number",
+                }
+            };
+            return response.json(result);
+        }
+        user = yield api.getUser();
+        if (typeof data.input.page === 'undefined') {
+            data.input.page = 1;
+        }
+        var list = yield StTracker.query()
+            .select('id', 'tracker_user_id')
+            .where('tracker_user_id', user.id)
+            .with('tracker')
+            .scope('tracker', function (builder) {
+                builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')
+                    .with('tokens')
+                    .with('socket')
+            })
+            .paginate(data.input.page, 1);
+        return response.json(list);
+    }
+
+    //---------------------------------------------------------
+    *allTrackersFromToken(request, response) {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+        if (data.input.hasOwnProperty('help')) {
+            result = {
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | token of the user is required",
+                }
+            };
+            return response.json(result);
+        }
+        var stTracker = new StTracker();
+        result = yield stTracker.trackersFromToken(data.input.token);
+        return response.json(result);
+    }
+
+    //---------------------------------------------------------
     //---------------------------------------------------------
 } //end of class
 module.exports = ApiTrackerController;

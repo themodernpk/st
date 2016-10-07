@@ -72,17 +72,26 @@ class ApiUserController {
             return response.json(result);
         }
         user = yield api.getUser();
-        var stUser = yield StUser.find(user.id);
+        var stUser = yield StUser.query().select('id', 'first_name').where("id",user.id).first();
         var token = yield stUser.tokens().first();
-        var trackers = yield stUser.trackers().with('user', 'socket').fetch();
-        var tracking = yield stUser.tracking().with('user', 'socket').fetch();
+        var trackers = yield stUser.trackers().with('user.tokens', 'socket').fetch();
+
+        if(trackers)
+        {
+
+            for(var item in trackers)
+            {
+
+            }
+        }
+
+        var tracking = yield stUser.tracking().with('user.tokens', 'socket').fetch();
         result = {
             user: stUser,
             token: token,
             trackers: trackers,
             tracking: tracking,
         };
-
         return response.json(result);
     }
     //---------------------------------------------------------

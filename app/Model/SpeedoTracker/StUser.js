@@ -16,7 +16,7 @@ class StUser extends User {
     }
     //---------------------------------------------
     socket() {
-        return this.hasMany('App/Model/SpeedoTracker/StSocket', 'id', 'core_user_id')
+        return this.hasOne('App/Model/SpeedoTracker/StSocket', 'id', 'core_user_id')
     }
     //---------------------------------------------
     //---------------------------------------------

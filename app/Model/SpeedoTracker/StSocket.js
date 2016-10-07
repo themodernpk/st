@@ -28,7 +28,11 @@ class StSocket extends Lucid {
     }
     //---------------------------------------------
     user() {
-        return this.belongsTo('App/Model/Niddar/User')
+        return this.belongsTo('App/Model/SpeedoTracker/StUser', 'id', 'core_user_id')
+    }
+    //---------------------------------------------
+    token() {
+        return this.hasOne('App/Model/Niddar/Token', 'core_user_id', 'user_id')
     }
     //---------------------------------------------
     static createRules() {
@@ -73,6 +77,19 @@ class StSocket extends Lucid {
     //---------------------------------------------
     *createOrUpdateFromToken(input)
     {
+        var rules = {
+            token: "required"
+        };
+
+        const validation = yield Validator.validateAll(input, rules);
+        if (validation.fails()) {
+            var result = {
+                status: "failed",
+                errors: validation.messages()
+            };
+            return result;
+        }
+
         var stSocket = new StSocket();
         var token = new Token();
         var user = yield token.getUserFromToken(input.token);
@@ -103,6 +120,7 @@ class StSocket extends Lucid {
     }
     //---------------------------------------------
     *createItem(input)  {
+
         //..............validation
         const validation = yield Validator
             .validateAll(input, StSocket.createRules().validation, StSocket.createRules().messages);
@@ -174,7 +192,6 @@ class StSocket extends Lucid {
             };
             return result;
         }
-
 
         //..............
         var item = yield StSocket.find(input.id);

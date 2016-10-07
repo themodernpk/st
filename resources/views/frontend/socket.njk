@@ -16,11 +16,32 @@
 <div class="container">
 
     <div class="row">
+        <div class="col-md-12">
+            <h2>User Details</h2>
+            <table class="table table-bordered">
+                <tr>
+                    <th width="100">Name</th><td>{{ data.user.first_name }}</td>
+                </tr><tr>
+                    <th width="100">Email</th><td>{{ data.user.email }}</td>
+                </tr><tr>
+                    <th width="100">User ID</th><td>{{ data.user.id }}</td>
+                </tr><tr>
+                    <th width="100">Socket</th><td>{{ data.user.socket.socket_id }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="dynamicsparkline"></div>
+
+
         <div class="col-md-6">
-            <h2>Speed Tracking</h2>
+            <h2>Send Speed: <span class="speed"></span></h2>
+
+
 
             <form id="speedTracking">
-
 
                 Tracking Request To: <input type="text" name="speed" class="form-control" value=""/>
                 <br/>
@@ -32,10 +53,65 @@
 
                 <br/>
 
-                <button type="submit" class="btn btn-success">Send Speed</button>
+                <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Send Speed</button>
+                <button type="button" class="btn btn-success" id="start">Start</button>
+                </div>
 
             </form>
         </div>
+
+        <div class="col-md-6">
+            <h3>Speed Received For (tracking):</h3>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Socket</th>
+                    <th>Speed</th>
+                </tr>
+
+                {% for item in data.user.tracking %}
+                    <tr>
+                        <td>{{ item.user.first_name }}</td>
+                        <td>{{ item.user.email }}</td>
+                        {% if item.user.socket %}
+                            <td>
+                                {{ item.user.socket.socket_id }}
+                            </td>
+                            <td style="color:red;" class="{{ item.user.socket.token.token }}">
+
+                            </td>
+                        {% else %}
+                            <th>NA</th>
+                            <th></th>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <div class="graph_{{ item.user.socket.token.token }}"></div>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+
+
+
+        </div>
+
+
+
+        <div class="col-md-2">
+
+        </div>
+
+    </div> <!-- row end-->
+
+    <hr/>
+
+    <div class="row">
 
         <div class="col-md-6">
             <h2>Raise Tracking Request</h2>
@@ -55,14 +131,16 @@
 
                 <button type="submit" class="btn btn-success">Tracking Request</button>
 
+
             </form>
         </div>
 
-        <div class="col-md-2">
-            <h1>Speed: <span class="speed"></span></h1>
+        <div class="col-md-6">
+
+
         </div>
 
-    </div> <!-- row end-->
+    </div>
 
 
 
@@ -72,6 +150,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="http://omnipotent.net/jquery.sparkline/2.1.2/jquery.sparkline.min.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+
+
+
+    });
+</script>
 
 <script>
     //var socketHost = "http://localhost:2222";
@@ -98,11 +185,15 @@
         console.log("socket specific", data);
     });
     //-----------------------------------------------------------------
+
+
+    //-----------------------------------------------------------------
     $("#speedTracking").submit(function(e){
         e.preventDefault();
         var data = $(this).serializeFormJSON();
-        console.log("data", data);
+
         socket.emit("receive_tracked_speed", data);
+        $(".speed").html(data.speed);
 
         $("input[name=speed]").val(randomNumberFromRange(20, 40));
         $("input[name=lat]").val(getRandomInRange(-180, 180, 3));
@@ -110,10 +201,68 @@
 
     });
     //-----------------------------------------------------------------
+    var graph = [];
+    var i = 0;
+    //-----------------------------------------------------------------
     socket.on('emit_tracked_speed', function (data) {
         console.log("speed speed received", data);
-        $(".speed").html(data.speed);
+        console.log("speed", data.speed);
+        $("."+data.token).html("<b>"+data.speed+"</b>");
+
+
+        if(graph[data.token])
+        {
+            graph[data.token].push(data.speed);
+
+        } else
+        {
+            graph[data.token] = [];
+            graph[data.token].push(data.speed);
+        }
+
+        console.log("response", graph);
+
+        var graphLen = graph[data.token].length;
+
+        if(graphLen > 20)
+        {
+            graph[data.token].splice(graph[data.token], 1);
+        }
+        console.log("graph", graph[data.token]);
+
+        $('.graph_'+data.token).sparkline(graph[data.token], {
+            width:"100%",
+        });
+
+        i++;
+
     });
+    //-----------------------------------------------------------------
+    var timer = null,
+    interval = 1000;
+
+    $("body").on("click", "#start", function() {
+        console.log("start");
+        if (timer !== null) return;
+        timer = setInterval(function () {
+            $("#speedTracking").submit();
+        }, interval);
+
+        $(this).text("Stop");
+        $(this).addClass("btn-danger");
+        $(this).attr("id", "stop");
+
+    });
+
+    $("body").on("click", "#stop", function() {
+        clearInterval(timer);
+        timer = null;
+        $(this).text("Start");
+        $(this).removeClass("btn-danger");
+        $(this).attr("id", "start");
+    });
+    //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
     //-----------------------------------------------------------------
 
     //serialize data to json object

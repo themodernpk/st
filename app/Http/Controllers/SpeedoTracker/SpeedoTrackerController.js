@@ -18,7 +18,15 @@ class SpeedoTrackerController {
         data.input = request.all();
         data.params = request.params();
         data.title = Niddar.info.appName();
-        data.user = yield Token.findBy("token", data.input.token);
+        var token = yield Token.findBy("token", data.input.token);
+
+        var getUser = yield StUser
+            .with('socket', 'trackers', 'tracking.user.socket.token')
+            .where('id', token.user_id).first();
+        data.user = getUser.toJSON();
+
+        //console.log("response", data.user);
+
         data.list = {};
         data.list.user = yield StUser.all();
         data.list.user = data.list.user.toJSON();
