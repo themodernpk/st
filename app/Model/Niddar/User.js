@@ -28,8 +28,8 @@ class User extends Lucid {
     return this.hasMany('App/Model/Niddar/Token', 'id', 'user_id')
   }
   //---------------------------------------------
-  tokens () {
-    return this.hasMany('App/Model/Niddar/Token', 'id', 'user_id')
+  token () {
+    return this.hasOne('App/Model/Niddar/Token', 'id', 'user_id')
   }
   //---------------------------------------------
   roles() {
@@ -188,7 +188,7 @@ class User extends Lucid {
     try{
       yield authSession.attempt(input.email,input.password);
       var user = yield authSession.getUser();
-      var first = yield user.tokens().first();
+      var first = yield user.token().first();
       result = {
         status: "success",
         data: {

@@ -14,7 +14,7 @@ class AuthApi {
       response.unauthorized(result);
     }
 
-    if(user.enable == 0)
+/*    if(user.enable == 0)
     {
       result = {
         status: "failed",
@@ -23,7 +23,7 @@ class AuthApi {
       };
       response.unauthorized(result);
     }
-
+ */
 
     yield next;
   }

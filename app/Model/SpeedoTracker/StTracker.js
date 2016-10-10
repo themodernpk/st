@@ -40,6 +40,7 @@ class StTracker extends Lucid {
         return this.belongsTo('App/Model/SpeedoTracker/StSocket', 'core_user_id', 'tracker_user_id')
     }
     //---------------------------------------------
+    //---------------------------------------------
     static createRules() {
         return {
             validation: {

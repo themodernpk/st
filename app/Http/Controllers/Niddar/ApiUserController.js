@@ -73,8 +73,8 @@ class ApiUserController {
         }
         user = yield api.getUser();
         var stUser = yield StUser.query().select('id', 'first_name').where("id",user.id).first();
-        var token = yield stUser.tokens().first();
-        var trackers = yield stUser.trackers().with('user.tokens', 'socket').fetch();
+        var token = yield stUser.token().first();
+        var trackers = yield stUser.trackers().with('user.token', 'socket').fetch();
 
         if(trackers)
         {
@@ -84,8 +84,7 @@ class ApiUserController {
 
             }
         }
-
-        var tracking = yield stUser.tracking().with('user.tokens', 'socket').fetch();
+        var tracking = yield stUser.tracking().with('user.token', 'socket').fetch();
         result = {
             user: stUser,
             token: token,

@@ -149,7 +149,6 @@ Route.group('bApi', function () {
 
 }).prefix('/api'+api_version).middleware('authApi');
 
-
 /*
  |--------------------------------------------------------------------------
  | SpeedoTracker
@@ -159,7 +158,6 @@ Route.group('speedoTrackerPublic', function () {
     Route.any("/socket", 'SpeedoTracker/SpeedoTrackerController.socket').as("webSocket");
     Route.any("/test", 'SpeedoTracker/SpeedoTrackerController.test');
 }).prefix("/speedotracker");
-
 
 /*
  |--------------------------------------------------------------------------

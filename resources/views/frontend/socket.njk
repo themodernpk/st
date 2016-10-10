@@ -36,14 +36,14 @@
         <div class="dynamicsparkline"></div>
 
 
-        <div class="col-md-6">
-            <h2>Send Speed: <span class="speed"></span></h2>
+        <div class="col-md-4">
+            <h3>Send Speed: <span class="speed"></span></h3>
 
 
 
             <form id="speedTracking">
 
-                Tracking Request To: <input type="text" name="speed" class="form-control" value=""/>
+                <input type="text" name="speed" class="form-control" value=""/>
                 <br/>
 
                 <input type="text" name="lat" class="form-control" value=""/><br/>
@@ -61,38 +61,48 @@
             </form>
         </div>
 
-        <div class="col-md-6">
+        <style>
+            table {border-collapse:collapse; table-layout:fixed; }
+            table td {border:solid 1px #fab; word-wrap:break-word;}
+        </style>
+
+        <div class="col-md-8">
             <h3>Speed Received For (tracking):</h3>
             <table class="table table-bordered">
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Socket</th>
-                    <th>Speed</th>
+                    <th>Details</th>
+                    <th style="max-width: 200px;">Socket</th>
+                    <th width="60">Speed</th>
+                    <th width="200" style="width: 200px">Graph</th>
                 </tr>
 
                 {% for item in data.user.tracking %}
                     <tr>
-                        <td>{{ item.user.first_name }}</td>
-                        <td>{{ item.user.email }}</td>
+                        <td>{{ item.user.first_name }}
+                            {{ item.user.email }}
+                        </td>
+
                         {% if item.user.socket %}
-                            <td>
+                            <td style="word-wrap: break-word">
                                 {{ item.user.socket.socket_id }}
                             </td>
-                            <td style="color:red;" class="{{ item.user.socket.token.token }}">
-
+                            <td style="color:red; text-align: center" class="{{ item.user.socket.token.token }}">
                             </td>
                         {% else %}
                             <th>NA</th>
                             <th></th>
                         {% endif %}
-                    </tr>
-                    <tr>
-                        <td colspan="5">
-                            <div class="graph_{{ item.user.socket.token.token }}"></div>
 
-                        </td>
+                        <td class="graph"><div class="graph_{{ item.user.socket.token.token }}"></div></td>
+
                     </tr>
+
+                    <style>
+                        .graph canvas{
+                            max-width: 100% !important;
+                        }
+                    </style>
+
                 {% endfor %}
 
             </table>
@@ -136,6 +146,25 @@
         </div>
 
         <div class="col-md-6">
+
+            <h2>Trackers</h2>
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Details</th>
+                    <th>Socket</th>
+                </tr>
+                {% for item in data.user.trackers %}
+                <tr>
+                    <td>
+                        {{ item.tracker.id }} )
+                        {{ item.tracker.first_name }}
+                        {{ item.tracker.email }}
+                    </td>
+                    <td>{{ item.tracker.token.token }}</td>
+                </tr>
+                {% endfor %}
+            </table>
 
 
         </div>
@@ -224,7 +253,7 @@
 
         var graphLen = graph[data.token].length;
 
-        if(graphLen > 20)
+        if(graphLen > 50)
         {
             graph[data.token].splice(graph[data.token], 1);
         }
@@ -240,7 +269,6 @@
     //-----------------------------------------------------------------
     var timer = null,
     interval = 1000;
-
     $("body").on("click", "#start", function() {
         console.log("start");
         if (timer !== null) return;
