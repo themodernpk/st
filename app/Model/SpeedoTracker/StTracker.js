@@ -215,6 +215,8 @@ class StTracker extends Lucid {
     }
 
     //---------------------------------------------
+
+    //---------------------------------------------
     *trackersFromToken(token)
     {
         var getToken = yield StToken.findBy('token', token);

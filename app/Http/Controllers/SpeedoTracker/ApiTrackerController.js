@@ -30,6 +30,9 @@ class ApiTrackerController {
             };
             return response.json(result);
         }
+
+
+
         user = yield api.getUser();
         if (typeof data.input.created_by === 'undefined') {
             data.input.created_by = user.id;
@@ -96,7 +99,7 @@ class ApiTrackerController {
         if (typeof data.input.page === 'undefined') {
             data.input.page = 1;
         }
-        var list = yield StTracker.query()
+/*        var list = yield StTracker.query()
             .select('id', 'tracker_user_id', 'core_user_id')
             .where('core_user_id', user.id)
             .with('tracker')
@@ -105,7 +108,27 @@ class ApiTrackerController {
                     .with('token')
                     .with('socket')
             })
+            .paginate(data.input.page, 20);*/
+
+
+/*        var getUser = yield StUser
+            .with('tracking.user.socket.token')
+            .where('id', user.id).first();
+        var list = getUser.toJSON();*/
+
+
+        var list = yield StTracker.query()
+            .where('tracker_user_id', user.id)
+            .with('user')
+            .scope('user', function (builder) {
+                builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')
+                    .with('token')
+                    .with('socket')
+            })
+
             .paginate(data.input.page, 1);
+
+
         return response.json(list);
     }
 
