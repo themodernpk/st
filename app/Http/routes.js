@@ -187,6 +187,9 @@ Route.group('apiSt', function () {
 
     Route.any("/user/socket", 'SpeedoTracker/ApiSocketController.socket');
 
+    Route.any("/limit/set", 'SpeedoTracker/ApiSpeedLimitController.set');
+    Route.any("/limit/get", 'SpeedoTracker/ApiSpeedLimitController.get');
+
 
 
 

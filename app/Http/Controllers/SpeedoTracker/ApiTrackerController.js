@@ -99,23 +99,6 @@ class ApiTrackerController {
         if (typeof data.input.page === 'undefined') {
             data.input.page = 1;
         }
-/*        var list = yield StTracker.query()
-            .select('id', 'tracker_user_id', 'core_user_id')
-            .where('core_user_id', user.id)
-            .with('tracker')
-            .scope('tracker', function (builder) {
-                builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')
-                    .with('token')
-                    .with('socket')
-            })
-            .paginate(data.input.page, 20);*/
-
-
-/*        var getUser = yield StUser
-            .with('tracking.user.socket.token')
-            .where('id', user.id).first();
-        var list = getUser.toJSON();*/
-
 
         var list = yield StTracker.query()
             .where('tracker_user_id', user.id)
