@@ -17,12 +17,15 @@ class ApiTrackerController {
         data.input = request.all();
         data.params = request.params();
         const api = request.auth.authenticator('api');
-        if (data.input.hasOwnProperty('help')) {
+
+        if (data.input.hasOwnProperty('help'))
+        {
             result = {
                 status: "help",
                 title: "This method accept following parameters",
                 parameters: {
-                    core_user_id: "required | user id ",
+                    email: "email or mobile must be set ",
+                    mobile: "email or mobile must be set",
                     tracker_user_id: "optional | token will be used to identify the user",
                     status: "optional | default status will be pending",
                     created_by: "optional | User id of the user who is creating the recode",
@@ -31,16 +34,12 @@ class ApiTrackerController {
             return response.json(result);
         }
 
+        data.input.user = yield api.getUser();
 
+        var stTracker = new StTracker;
 
-        user = yield api.getUser();
-        if (typeof data.input.created_by === 'undefined') {
-            data.input.created_by = user.id;
-        }
-        if (typeof data.input.tracker_user_id === 'undefined') {
-            data.input.tracker_user_id = user.id;
-        }
-        result = yield tracker.createOrUpdate(data.input);
+        result = yield stTracker.trackerRequest(data.input);
+
         return response.json(result);
     }
 
@@ -60,24 +59,70 @@ class ApiTrackerController {
             };
             return response.json(result);
         }
-        user = yield api.getUser();
-        if (typeof data.input.page === 'undefined') {
-            data.input.page = 1;
-        }
-        var list = yield StTracker.query().select('id', 'core_user_id', 'tracker_user_id')
-            .where('core_user_id', user.id)
-            .with('tracker')
-            .scope('tracker', function (builder) {
-                builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')
-                    .with('token')
-                    .with('socket')
-            })
+        data.input.user = yield api.getUser();
+        data.input.status = 'approved';
 
-            .paginate(data.input.page, 1);
+        var stTracker = new StTracker;
+        result = yield stTracker.trackersList(data.input);
 
-
-        return response.json(list);
+        return response.json(result);
     }
+
+    //---------------------------------------------------------
+    *trackersPendingRequests(request, response)
+    {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+        if (data.input.hasOwnProperty('help')) {
+            result = {
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | token of the user is required",
+                    page: "required | page number",
+                }
+            };
+            return response.json(result);
+        }
+        data.input.user = yield api.getUser();
+        data.input.status = 'pending';
+
+        var stTracker = new StTracker;
+        result = yield stTracker.trackersList(data.input);
+
+        return response.json(result);
+
+    }
+    //---------------------------------------------------------
+    *trackerChangeStatus(request, response)
+    {
+        data.input = request.all();
+        data.params = request.params();
+        const api = request.auth.authenticator('api');
+        if (data.input.hasOwnProperty('help')) {
+            result = {
+                status: "help",
+                title: "This method accept following parameters",
+                parameters: {
+                    token: "required | token of the user is required",
+                    tracker_user_id: "required | user id",
+                    status: "required | approved or disapproved ",
+                }
+            };
+            return response.json(result);
+        }
+
+        data.input.user = yield api.getUser();
+
+        var stTracker = new StTracker;
+        result = yield stTracker.changeStatus(data.input);
+
+        return response.json(result);
+
+    }
+    //---------------------------------------------------------
+
 
     //---------------------------------------------------------
     *tracking(request, response) {
@@ -102,6 +147,7 @@ class ApiTrackerController {
 
         var list = yield StTracker.query()
             .where('tracker_user_id', user.id)
+            .where("status", 'approved')
             .with('user')
             .scope('user', function (builder) {
                 builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')

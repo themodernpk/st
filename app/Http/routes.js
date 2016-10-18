@@ -172,16 +172,22 @@ Route.group('apiSt', function () {
     Route.any("/tracker/request", 'SpeedoTracker/ApiTrackerController.request')
         .as("apiTrackerRequest");
 
+    Route.any("/tracker/invite", 'SpeedoTracker/ApiStInviteController.invite')
+        .as("apiTrackerInvite");
+
+
+
     Route.any("/get/users", 'SpeedoTracker/ApiStUserController.users')
         .as("apiStUsers");
 
     Route.any("/speed/history", 'SpeedoTracker/ApiSpeedTrackerController.history')
         .as("apiSpeedHistory");
 
-
     Route.any("/user/trackers/all", 'SpeedoTracker/ApiTrackerController.allTrackersFromToken');
 
-    Route.any("/user/trackers", 'SpeedoTracker/ApiTrackerController.trackers');
+    Route.any("/user/trackers/approved", 'SpeedoTracker/ApiTrackerController.trackers');
+    Route.any("/user/trackers/pending/requests", 'SpeedoTracker/ApiTrackerController.trackersPendingRequests');
+    Route.any("/user/trackers/change/status", 'SpeedoTracker/ApiTrackerController.trackerChangeStatus');
 
     Route.any("/user/tracking", 'SpeedoTracker/ApiTrackerController.tracking');
 
@@ -190,7 +196,8 @@ Route.group('apiSt', function () {
     Route.any("/limit/set", 'SpeedoTracker/ApiSpeedLimitController.set');
     Route.any("/limit/get", 'SpeedoTracker/ApiSpeedLimitController.get');
 
-
+    Route.any("/setting/set", 'SpeedoTracker/ApiStSettingController.set');
+    Route.any("/setting/get", 'SpeedoTracker/ApiStSettingController.get');
 
 
 }).prefix('/api'+api_version+"/st").middleware('authApi');

@@ -3,8 +3,6 @@ class AuthApi {
   * handle(request, response, next) {
     var result = {};
     const api = request.auth.authenticator('api');
-
-
     const user = yield api.getUser();
     if(!user) {
       result = {

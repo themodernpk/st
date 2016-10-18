@@ -4,6 +4,7 @@ const Database = use('Database');
 const Validator = use('Validator');
 const Niddar = use("App/Niddar");
 const Setting = use("App/Model/Niddar/Setting");
+const StUser = use("App/Model/SpeedoTracker/StUser");
 
 const Token = use("App/Model/Niddar/Token");
 
@@ -224,6 +225,8 @@ class StSocket extends Lucid {
         return result;
     }
     //---------------------------------------------
+
+
 
     //---------------------------------------------
 }

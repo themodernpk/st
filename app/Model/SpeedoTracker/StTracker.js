@@ -264,6 +264,150 @@ class StTracker extends Lucid {
         }
     }
     //---------------------------------------------
+    *trackersList(input)
+    {
+
+        if (typeof input.page === 'undefined') {
+            input.page = 1;
+        }
+        var list = yield StTracker.query().select('id', 'core_user_id', 'tracker_user_id')
+            .where('core_user_id', input.user.id)
+            .where("status", '=', input.status)
+            .with('tracker')
+            .scope('tracker', function (builder) {
+                builder.select('id', 'first_name', 'last_name', 'email', 'core_country_id', 'mobile')
+                    .with('token')
+                    .with('socket')
+            })
+
+            .paginate(input.page, 1);
+
+        result = {
+            status: "success",
+            data: list
+        }
+
+        return result;
+
+    }
+    //---------------------------------------------
+    *changeStatus(input)
+    {
+        var rules = {
+            user: "required",
+            tracker_user_id: "required",
+            status: "required",
+        };
+        const validation = yield Validator.validateAll(input, rules);
+        if (validation.fails()) {
+            var result = {
+                status: "failed",
+                errors: validation.messages()
+            };
+            return result;
+        }
+
+        var trackerRequest = yield StTracker.query().where('core_user_id', input.user.id)
+            .where('tracker_user_id', input.tracker_user_id)
+            .first();
+
+        if(trackerRequest)
+        {
+            trackerRequest.status = input.status;
+            yield trackerRequest.save();
+        }
+
+        result = {
+            status: 'success',
+            data: trackerRequest
+        };
+
+        return result;
+
+    }
+    //---------------------------------------------
+    *trackerRequest(input)
+    {
+        if (typeof input.mobile === 'undefined' || typeof input.email === 'undefined')
+        {
+            result = {
+                status: "failed",
+                errors: [{message: "you must pass email or mobile number of the user"}]
+            };
+            return result;
+        }
+
+        //check user is registered or not
+        if (input.hasOwnProperty('email'))
+        {
+            var item = yield StUser.findBy("email", input.email);
+        } else if(input.hasOwnProperty('email'))
+        {
+            var item = yield StUser.findBy("mobile", input.mobile);
+        }
+
+        if(!item)
+        {
+            result = {
+                status: "invite",
+                errors: [{message: "No user have registered with the email or mobile. You should invited the user"}]
+            };
+            return result;
+        }
+        input.core_user_id = item.id;
+
+
+        if (input.hasOwnProperty('user') &&  typeof input.created_by === 'undefined') {
+            input.created_by = input.user.id;
+        }
+        if (input.hasOwnProperty('user') && typeof input.tracker_user_id === 'undefined') {
+            input.tracker_user_id = input.user.id;
+        }
+
+        var tracker = new StTracker();
+
+        result = yield tracker.createOrUpdate(input);
+
+        return result;
+    }
+    //---------------------------------------------
+    *createOrUpdate(input)
+    {
+        var stTracker = new StTracker();
+        if (typeof input.core_user_id !== 'undefined'){
+            var item = yield StTracker.findBy('core_user_id', input.core_user_id);
+            if(item)
+            {
+                input.id = item.id;
+                result = yield stTracker.updateItem(input);
+            } else
+            {
+                result = yield stTracker.createItem(input);
+            }
+        } else
+        {
+            result = yield stTracker.createItem(input);
+        }
+
+        if(result.status == "success" && result.data.status == "pending")
+        {
+            var user = yield StUser.query().where('id', result.data.core_user_id)
+                    .select("id", "email", "first_name", "last_name", "mobile")
+                    .with('socket')
+                    .first()
+                ;
+
+            result = {
+                status: "success",
+                data: {
+                    request: result.data,
+                    user: user
+                }
+            }
+        }
+
+        return result;
+    }
     //---------------------------------------------
 }
 module.exports = StTracker

@@ -89,11 +89,20 @@ module.exports = function (server) {
              */
             //store the request to database
             co(function* () {
-                var result = yield stTracker.createFromToken(data);
+
+                console.log(red("data received"), data);
+
+                var result = yield stTracker.trackerRequest(data);
                 return result;
             }).then(function (responseData) {
                 console.log(responseData);
                 io.to(currentSocket).emit('raise_tracking_request_response', responseData);
+
+                if(responseData.status == "success" && responseData.data.hasOwnProperty('user'))
+                {
+                    io.to(responseData.data.socket.socket_id).emit('receive_new_tracking_request', responseData);
+                }
+
             }, function (err) {
                 console.error(err.stack);
             });
